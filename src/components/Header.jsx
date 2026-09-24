@@ -1,25 +1,39 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { NETFLIX_LOGO, USER_ICON } from "../utils/constants";
-import { signOut } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "../utils/firebase";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { addUser, removeUser } from "../utils/userSlice";
 
 const Header = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((store) => store.user);
 
   const handleSignOut = () => {
     signOut(auth)
-      .then(() => {
-        navigate("/");
-      })
+      .then(() => {})
       .catch((error) => {
         navigate("/error");
       });
   };
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const { uid, email, displayName } = user;
+        dispatch(addUser({ uid: uid, email: email, displayName: displayName }));
+        navigate("/browse");
+      } else {
+        dispatch(removeUser());
+        navigate("/");
+      }
+    });
+  }, []);
+
   return (
-    <div className="absolute top-0 z-20 flex w-full items-center justify-between bg-gradient-to-b from-black/80 via-black/40 to-transparent px-8 py-3">
+    <div className="absolute top-0 z-20 flex w-full items-center justify-between bg-linear-to-b from-black/80 via-black/40 to-transparent px-8 py-3">
       <img
         className="w-36 cursor-pointer transition hover:opacity-90 sm:w-44"
         src={NETFLIX_LOGO}
