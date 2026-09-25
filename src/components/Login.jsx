@@ -8,7 +8,7 @@ import {
   signInWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
+
 import { useDispatch } from "react-redux";
 import { addUser } from "../utils/userSlice";
 
@@ -29,11 +29,11 @@ const Login = () => {
     const passwordValue = password.current.value;
     const nameValue = isSignInForm ? null : name.current.value;
 
-    console.log(emailValue);
-    console.log(passwordValue);
-    console.log(nameValue);
+    // console.log(emailValue);
+    // console.log(passwordValue);
+    // console.log(nameValue);
     const message = checkValidData(emailValue, passwordValue, nameValue);
-    console.log(message);
+    // console.log(message);
     setErrorMessage(message);
 
     if (message) return;
@@ -62,7 +62,7 @@ const Login = () => {
             .catch((error) => {
               setErrorMessage(error.message);
             });
-          console.log(user);
+          // console.log(user);
           navigate("/browse");
         })
         .catch((error) => {
