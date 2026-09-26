@@ -9,7 +9,8 @@ const SecondaryContainer = () => {
 
   return (
     <div className="bg-zinc-950">
-      <div className="relative z-20 -mt-16 sm:-mt-32 md:-mt-48 lg:-mt-56 pl-4 md:pl-12">
+      {/* Dynamic responsive negative margin pulls the list cleanly over the trailer bottom */}
+      <div className="relative z-20 -mt-10 sm:-mt-24 md:-mt-40 lg:-mt-52 pl-3 sm:pl-6 md:pl-12 pb-10 space-y-4">
         <MovieList title={"Now Playing"} movies={movies.nowPlayingMovies} />
         <MovieList title={"Popular"} movies={movies.popularMovies} />
         <MovieList title={"Top Rated"} movies={movies.topRatedMovies} />

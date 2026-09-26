@@ -11,21 +11,19 @@ const Header = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((store) => store.user);
-  const showGptSearch = useSelector((store) => store.gpt.showGptSearch);
+  const showGptSearch = useSelector((store) => store.gpt?.showGptSearch);
 
   const handleSignOut = () => {
-    signOut(auth)
-      .then(() => {})
-      .catch((error) => {
-        navigate("/error");
-      });
+    signOut(auth).catch(() => {
+      navigate("/error");
+    });
   };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         const { uid, email, displayName } = user;
-        dispatch(addUser({ uid: uid, email: email, displayName: displayName }));
+        dispatch(addUser({ uid, email, displayName }));
         navigate("/browse");
       } else {
         dispatch(removeUser());
@@ -33,46 +31,48 @@ const Header = () => {
       }
     });
 
-    // Unsubscribe when component unmounts
-
     return () => unsubscribe();
-  }, []);
+  }, [dispatch, navigate]);
 
   const handleGptSearchClick = () => {
     dispatch(toggleGptSearchView());
   };
 
   return (
-    <div className="absolute top-0 z-20 flex w-full items-center justify-between bg-linear-to-b from-black/80 via-black/40 to-transparent px-8 py-3">
+    <header className="absolute top-0 z-30 flex w-full items-center justify-between bg-gradient-to-b from-black/90 via-black/50 to-transparent px-4 py-2.5 sm:px-8 sm:py-3.5 transition-all">
       <img
-        className="w-36 cursor-pointer transition hover:opacity-90 sm:w-44"
+        className="w-24 cursor-pointer object-contain transition hover:opacity-90 sm:w-36 md:w-44"
         src={NETFLIX_LOGO}
         alt="netflix-logo"
+        onClick={() => {
+          if (showGptSearch) dispatch(toggleGptSearchView());
+        }}
       />
 
       {user && (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-4">
           <button
-            className="m-2 rounded bg-purple-800 px-4 py-2 font-medium text-white hover:bg-purple-900"
+            className="rounded bg-purple-700 px-2.5 py-1.5 text-xs font-semibold text-white shadow transition hover:bg-purple-800 active:scale-95 sm:px-4 sm:py-2 sm:text-sm"
             onClick={handleGptSearchClick}
           >
-            {showGptSearch ? "Homepage" : "GPT Search"}
+            {showGptSearch ? "Home" : "GPT Search"}
           </button>
+
           <img
-            className="h-9 w-9 rounded object-cover ring-1 ring-zinc-700"
+            className="h-7 w-7 rounded object-cover ring-1 ring-zinc-700 sm:h-9 sm:w-9"
             src={USER_ICON}
             alt="user-icon"
           />
 
           <button
             onClick={handleSignOut}
-            className="rounded px-2 py-1 text-sm font-semibold text-white transition hover:text-red-500 cursor-pointer"
+            className="rounded px-1.5 py-1 text-xs font-semibold text-zinc-300 transition hover:text-red-500 sm:text-sm"
           >
             Sign out
           </button>
         </div>
       )}
-    </div>
+    </header>
   );
 };
 

@@ -8,7 +8,6 @@ import {
   signInWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth";
-
 import { useDispatch } from "react-redux";
 import { addUser } from "../utils/userSlice";
 
@@ -23,130 +22,119 @@ const Login = () => {
   const name = useRef(null);
 
   const handleBtnClick = () => {
-    // validate the form data
+    const emailValue = email.current?.value;
+    const passwordValue = password.current?.value;
+    const nameValue = isSignInForm ? null : name.current?.value;
 
-    const emailValue = email.current.value;
-    const passwordValue = password.current.value;
-    const nameValue = isSignInForm ? null : name.current.value;
-
-    // console.log(emailValue);
-    // console.log(passwordValue);
-    // console.log(nameValue);
     const message = checkValidData(emailValue, passwordValue, nameValue);
-    // console.log(message);
     setErrorMessage(message);
 
     if (message) return;
 
-    // Sign In Sign Up Logic
-
     if (!isSignInForm) {
-      // Sign Up logic
-      createUserWithEmailAndPassword(
-        auth,
-        email.current.value,
-        password.current.value,
-      )
+      createUserWithEmailAndPassword(auth, emailValue, passwordValue)
         .then((userCredential) => {
           const user = userCredential.user;
           updateProfile(user, {
-            displayName: name.current.value,
+            displayName: nameValue,
           })
             .then(() => {
               const { uid, email, displayName } = auth.currentUser;
-              dispatch(
-                addUser({ uid: uid, email: email, displayName: displayName }),
-              );
-              navigate("/browse");
+              dispatch(addUser({ uid, email, displayName }));
             })
             .catch((error) => {
               setErrorMessage(error.message);
             });
-          // console.log(user);
-          navigate("/browse");
         })
         .catch((error) => {
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          setErrorMessage(errorCode + " " + errorMessage);
+          setErrorMessage(`${error.code} - ${error.message}`);
         });
     } else {
-      // Sign In Logic
-      signInWithEmailAndPassword(
-        auth,
-        email.current.value,
-        password.current.value,
-      )
-        .then((userCredential) => {
-          const user = userCredential.user;
-        })
-        .catch((error) => {
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          setErrorMessage(errorCode + " " + errorMessage);
-        });
+      signInWithEmailAndPassword(auth, emailValue, passwordValue).catch(
+        (error) => {
+          setErrorMessage(`${error.code} - ${error.message}`);
+        },
+      );
     }
   };
 
   const toggleSignInForm = () => {
     setIsSignInForm(!isSignInForm);
+    setErrorMessage(null);
   };
 
   return (
-    <div>
+    <div className="relative min-h-screen w-full overflow-hidden bg-black">
       <Header />
-      <div className="absolute ">
+
+      {/* Fixed Fullscreen Background */}
+      <div className="fixed inset-0 -z-10 h-full w-full">
         <img
           src={NETFLIX_BG_IMG}
           alt="bg-img"
           className="h-full w-full object-cover brightness-50"
         />
       </div>
-      <form
-        onSubmit={(e) => e.preventDefault()}
-        className="absolute left-0 right-0 top-36 mx-auto w-full max-w-sm rounded bg-black/75 p-10 text-white"
-      >
-        <h1 className="py-4 text-3xl font-bold">
-          {isSignInForm ? "Sign In" : "Sign Up"}
-        </h1>
-        {!isSignInForm && (
-          <input
-            ref={name}
-            type="text"
-            placeholder="Full Name"
-            className="my-2 w-full rounded bg-zinc-800 p-3 text-sm outline-none focus:ring-1 focus:ring-zinc-500"
-          />
-        )}
-        <input
-          ref={email}
-          type="text"
-          placeholder="Email Address"
-          className="my-2 w-full rounded bg-zinc-800 p-3 text-sm outline-none focus:ring-1 focus:ring-zinc-500"
-        />
 
-        <input
-          ref={password}
-          type="password"
-          placeholder="Password"
-          className="my-2 w-full rounded bg-zinc-800 p-3 text-sm outline-none focus:ring-1 focus:ring-zinc-500"
-        />
-        <p className="text-red-500 font-bold text-lg p-2 ">{errorMessage}</p>
-        <button
-          className="my-6 w-full rounded bg-red-600 p-3 font-semibold hover:bg-red-700 cursor-pointer"
-          onClick={handleBtnClick}
+      {/* Centered responsive container */}
+      <main className="flex min-h-screen items-center justify-center px-4 py-24 sm:px-6">
+        <form
+          onSubmit={(e) => e.preventDefault()}
+          className="w-full max-w-[420px] rounded-lg bg-black/80 p-6 sm:p-10 text-white shadow-2xl backdrop-blur-sm"
         >
-          {isSignInForm ? "Sign In" : "Sign Up"}
-        </button>
-        <div className="mt-10 text-sm text-zinc-400">
-          {isSignInForm ? "New to Netflix" : "Already registered?"}
-          <span
-            onClick={toggleSignInForm}
-            className=" mx-2 cursor-pointer font-medium text-white hover:underline"
+          <h1 className="py-2 text-2xl font-bold sm:text-3xl sm:py-4">
+            {isSignInForm ? "Sign In" : "Sign Up"}
+          </h1>
+
+          {!isSignInForm && (
+            <input
+              ref={name}
+              type="text"
+              placeholder="Full Name"
+              className="my-2.5 w-full rounded bg-zinc-800/90 p-3 text-sm outline-none ring-1 ring-zinc-700/50 focus:ring-1 focus:ring-zinc-400"
+            />
+          )}
+
+          <input
+            ref={email}
+            type="text"
+            placeholder="Email Address"
+            className="my-2.5 w-full rounded bg-zinc-800/90 p-3 text-sm outline-none ring-1 ring-zinc-700/50 focus:ring-1 focus:ring-zinc-400"
+          />
+
+          <input
+            ref={password}
+            type="password"
+            placeholder="Password"
+            className="my-2.5 w-full rounded bg-zinc-800/90 p-3 text-sm outline-none ring-1 ring-zinc-700/50 focus:ring-1 focus:ring-zinc-400"
+          />
+
+          {errorMessage && (
+            <p className="py-2 text-xs font-semibold text-red-500 sm:text-sm">
+              {errorMessage}
+            </p>
+          )}
+
+          <button
+            className="my-5 w-full rounded bg-red-600 py-3 text-sm font-semibold transition hover:bg-red-700 active:scale-[0.98] sm:text-base cursor-pointer"
+            onClick={handleBtnClick}
           >
-            {isSignInForm ? "Sign up now." : "Sign in now."}
-          </span>
-        </div>
-      </form>
+            {isSignInForm ? "Sign In" : "Sign Up"}
+          </button>
+
+          <div className="mt-6 text-xs text-zinc-400 sm:text-sm">
+            <span>
+              {isSignInForm ? "New to Netflix?" : "Already registered?"}
+            </span>
+            <span
+              onClick={toggleSignInForm}
+              className="ml-2 cursor-pointer font-medium text-white hover:underline"
+            >
+              {isSignInForm ? "Sign up now." : "Sign in now."}
+            </span>
+          </div>
+        </form>
+      </main>
     </div>
   );
 };
